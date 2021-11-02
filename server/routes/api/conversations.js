@@ -72,10 +72,9 @@ router.get("/", async (req, res, next) => {
       convoJSON.latestMessageText = convoJSON.messages[latestMessageIndex].text;
       conversations[i] = convoJSON;
     }
-      conversations.sort((a, b) =>
+    conversations.sort((a, b) =>
       b.messages[b.messages.length - 1].createdAt - a.messages[a.messages.length - 1].createdAt
     );
-
     res.json(conversations);
   } catch (error) {
     next(error);

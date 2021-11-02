@@ -10,21 +10,20 @@ export const addMessageToStore = (state, payload) => {
     newConvo.latestMessageText = message.text;
     return [newConvo, ...state];
   }
-
-  let index;
-  let conv;
+  let start;
+  let convos;
   for (let i = 0; i < state.length; i++) {
     if (state[i].id === message.conversationId) {
       const convoCopy = { ...state[i] };
       convoCopy.messages.push(message);
       convoCopy.latestMessageText = message.text;
-      index = i;
-      conv = convoCopy;
+      start = i;
+      convos = convoCopy;
     }
   }
-  if (conv) {
-    state.splice(index, 1);
-    return [conv, ...state];
+  if (convos) {
+    state.splice(start, 1);
+    return [convos, ...state];
   } else {
     return state;
   }
@@ -76,17 +75,24 @@ export const addSearchedUsersToStore = (state, users) => {
 };
 
 export const addNewConvoToStore = (state, recipientId, message) => {
-  return state.map((convo) => {
-    if (convo.otherUser.id === recipientId) {
-      const convoCopy = { ...convo };
+  let start;
+  let convos;
+  for (let i = 0; i < state.length; i++) {
+    if (state[i].otherUser.id === recipientId) {
+      const convoCopy = { ...state[i] };
       convoCopy.id = message.conversationId;
       convoCopy.messages.push(message);
       convoCopy.latestMessageText = message.text;
-      return convoCopy;
-    } else {
-      return convo;
+      start = i;
+      convos = convoCopy;
     }
-  });
+  }
+  if (convos) {
+    state.splice(start, 1);
+    return [convos, ...state];
+  } else {
+    return state;
+  }
 };
 
 export const setMessagesRead = (state, conversationId, messages) => {
