@@ -72,6 +72,9 @@ router.get("/", async (req, res, next) => {
       convoJSON.latestMessageText = convoJSON.messages[latestMessageIndex].text;
       conversations[i] = convoJSON;
     }
+      conversations.sort((a, b) =>
+      b.messages[b.messages.length - 1].createdAt - a.messages[a.messages.length - 1].createdAt
+    );
 
     res.json(conversations);
   } catch (error) {
@@ -79,4 +82,40 @@ router.get("/", async (req, res, next) => {
   }
 });
 
+router.put("/read", async (req, res, next) => {
+    if (!req.user) {
+      return res.sendStatus(401);
+    }
+    const userId = req.user.id;
+    const { senderId, conversationId, recipientId } = req.body;
+    if (userId !== recipientId) {
+      return res.sendStatus(401);
+    }
+    const conversation = await Conversation.findConversation(senderId, recipientId);
+    if (!conversation) {
+      return res.sendStatus(404);
+    }
+    const messages = await Message.findAll({
+      where: {
+        senderId: senderId,
+        conversationId: conversation.id,
+        isRead: false
+      }
+    });
+    if (!messages || messages.length == 0) {
+      return res.sendStatus(404);
+    }
+    const saveMessages = messages.map((message) => {
+      message.isRead = true;
+      return message;
+    });
+    messages.forEach(async (message) => {
+      await Message.update({ isRead: true },{
+        where: {
+          id: message.id
+        }
+      });
+    });
+    return res.send({ conversationId, messages: saveMessages });
+});
 module.exports = router;

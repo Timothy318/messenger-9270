@@ -11,17 +11,25 @@ export const addMessageToStore = (state, payload) => {
     return [newConvo, ...state];
   }
 
-  return state.map((convo) => {
-    if (convo.id === message.conversationId) {
-      const convoCopy = { ...convo };
+  let index;
+  let conv;
+  for (let i = 0; i < state.length; i++) {
+    if (state[i].id === message.conversationId) {
+      const convoCopy = { ...state[i] };
       convoCopy.messages.push(message);
       convoCopy.latestMessageText = message.text;
-      return convoCopy;      
-    } else {
-      return convo;
+      index = i;
+      conv = convoCopy;
     }
-  });
+  }
+  if (conv) {
+    state.splice(index, 1);
+    return [conv, ...state];
+  } else {
+    return state;
+  }
 };
+
 
 export const addOnlineUserToStore = (state, id) => {
   return state.map((convo) => {
@@ -80,3 +88,26 @@ export const addNewConvoToStore = (state, recipientId, message) => {
     }
   });
 };
+
+export const setMessagesRead = (state, conversationId, messages) => {
+  const newState = [...state];
+  for (let i = 0; i < newState.length; i++) {
+    if (newState[i].id === conversationId) {
+      let index = 0;
+      newState[i].messages = newState[i].messages.map((message) => {
+        if (messages[index] && message.id === messages[index].id) {
+          message = messages[index];
+          index++;
+        }
+        return message;
+      });
+      newState[i].unreadMessagesCount = 0;
+      break;
+    }
+  }
+  return [...newState];
+}
+
+
+
+

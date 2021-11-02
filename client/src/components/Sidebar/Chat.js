@@ -16,6 +16,16 @@ const useStyles = makeStyles((theme) => ({
     "&:hover": {
       cursor: "grab"
     }
+  },
+  circle: {
+    width: "30px",
+    height: "30px",
+    lineHeight: "30px",
+    borderRadius: "50%",
+    color: "white",
+    fontSize: "15px",
+    textAlign: "center",
+    background: "#3A8DFF"
   }
 }));
 
@@ -37,6 +47,7 @@ const Chat = (props) => {
         sidebar={true}
       />
       <ChatContent conversation={conversation} />
+      {props.unreadMessagesCount && props.unreadMessagesCount !== 0 && <Box className={classes.circle}>{props.unreadMessagesCount}</Box>}
     </Box>
   );
 };
