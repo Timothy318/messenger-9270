@@ -11,15 +11,23 @@ export const addMessageToStore = (state, payload) => {
     return [newConvo, ...state];
   }
 
-  return state.map((convo) => {
-    if (convo.id === message.conversationId) {
-      convo.messages.push(message);
-      convo.latestMessageText = message.text;
-      return convo;
-    } else {
-      return convo;
+  let start;
+  let convos;
+  for (let i = 0; i < state.length; i++) {
+    if (state[i].id === message.conversationId) {
+      const convoCopy = { ...state[i] };
+      convoCopy.messages.push(message);
+      convoCopy.latestMessageText = message.text;
+      start = i;
+      convos = convoCopy;
     }
-  });
+  }
+  if (convos) {
+    state.splice(start, 1);
+    return [convos, ...state];
+  } else {
+    return state;
+  }
 };
 
 export const addOnlineUserToStore = (state, id) => {
@@ -67,14 +75,22 @@ export const addSearchedUsersToStore = (state, users) => {
 };
 
 export const addNewConvoToStore = (state, recipientId, message) => {
-  return state.map((convo) => {
-    if (convo.otherUser.id === recipientId) {
-      convo.id = message.conversationId;
-      convo.messages.push(message);
-      convo.latestMessageText = message.text;
-      return convo;
-    } else {
-      return convo;
+  let start;
+  let convos;
+  for (let i = 0; i < state.length; i++) {
+    if (state[i].otherUser.id === recipientId) {
+      const convoCopy = { ...state[i] };
+      convoCopy.id = message.conversationId;
+      convoCopy.messages.push(message);
+      convoCopy.latestMessageText = message.text;
+      start = i;
+      convos = convoCopy;
     }
-  });
+  }
+  if (convos) {
+    state.splice(start, 1);
+    return [convos, ...state];
+  } else {
+    return state;
+  }
 };
