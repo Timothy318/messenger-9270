@@ -125,7 +125,7 @@ export const setMessagesRead = (body) => async (dispatch) => {
     const { data } = res;
     if (res.status === 200) {
       dispatch(readMessages(data.conversationId, data.messages));
-      socket.emit('messages-read', { conversationId: data.conversationId, messages: data.messages, recipientId: body.recipientId, senderId: body.senderId });
+      socket.emit('messages-read', { conversationId: data.conversationId, messages: data.messages, senderId: body.senderId });
     }
   } catch (error) {
     console.error(error);

@@ -2,7 +2,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { Box } from "@material-ui/core";
 import { Input, Header, Messages } from "./index";
 import { connect } from "react-redux";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { setMessagesRead } from "../../store/utils/thunkCreators";
 
 const useStyles = makeStyles(() => ({
@@ -23,38 +23,40 @@ const useStyles = makeStyles(() => ({
 
 const ActiveChat = (props) => {
   const classes = useStyles();
-  const { user } = props;
-  const conversation = props.conversation || {};
+  const { user, setMessagesRead } = props;
   const [lastReadIndex, setLastReadIndex] = useState(0);
+  //const conversation = props.conversation || {};
+  const conversation = useMemo(() => props.conversation || {}, [props.conversation]);
+
 
   useEffect(() => {
-    let conversations = props.conversation;
     let hasUnreadMessage = false;
-    if (conversations && conversations.messages) {
-      for (let i = conversations.messages.length - 1; i >= 0; i--) {
-        if (!conversations.messages[i].isRead && conversations.messages[i].senderId === conversations.otherUser.id) {
+    if (conversation && conversation.messages) {
+      for (let i = conversation.messages.length - 1; i >= 0; i--) {
+        if (!conversation.messages[i].isRead && conversation.messages[i].senderId === conversation.otherUser.id) {
           hasUnreadMessage = true;
         }
-        if (conversations.messages[i].isRead && conversations.messages[i].senderId === user.id) {
-          setLastReadIndex(conversations.messages[i].id);
+        if (conversation.messages[i].isRead && conversation.messages[i].senderId === user.id) {
+          setLastReadIndex(conversation.messages[i].id);
           break;
         }
       }
     }
     if (hasUnreadMessage) {
       async function messageRead() {
-        await props.setMessagesRead({
-          conversationId: props.conversation.id,
-          senderId: props.conversation.otherUser.id,
+        await setMessagesRead({
+          conversationId: conversation.id,
+          senderId: conversation.otherUser.id,
           recipientId: user.id
         });
       }
-      if (conversations && conversations.otherUser && conversations.id) {
+      if (conversation && conversation.otherUser && conversation.id) {
         messageRead();
       }
     }
 
-  }, [setLastReadIndex, props, user]);
+  }, [user, conversation, setMessagesRead]);
+
 
   return (
     <Box className={classes.root}>
