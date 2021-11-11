@@ -100,8 +100,8 @@ router.put("/read", async (req, res, next) => {
   }
   const userId = req.user.id;
   const { senderId, conversationId, recipientId } = req.body;
-  if (userId !== recipientId) {
-    return res.sendStatus(401);
+  if (userId !== recipientId && userId !== senderId) {
+    return res.sendStatus(403);
   }
 
   const conversation = await Conversation.findConversation(senderId, recipientId);
