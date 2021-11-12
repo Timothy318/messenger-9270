@@ -5,6 +5,7 @@ import {
   addConversation,
   setNewMessage,
   setSearchedUsers,
+  readMessages,
 } from "../conversations";
 import { gotUser, setFetchingStatus } from "../user";
 
@@ -117,3 +118,19 @@ export const searchUsers = (searchTerm) => async (dispatch) => {
     console.error(error);
   }
 };
+
+export const setMessagesRead = (body) => async (dispatch) => {
+  try {
+    const res = await axios.put(`/api/conversations/read`, body);
+    const { data } = res;
+    if (res.status === 200) {
+      dispatch(readMessages(data.conversationId, data.messages));
+      socket.emit('messages-read', { conversationId: data.conversationId, messages: data.messages, senderId: body.senderId });
+    }
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+
+

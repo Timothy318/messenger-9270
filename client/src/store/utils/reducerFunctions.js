@@ -1,5 +1,5 @@
 export const addMessageToStore = (state, payload) => {
-  const { message, sender } = payload;
+  const { message, sender,updateUnreadMessagesCount} = payload;
   // if sender isn't null, that means the message needs to be put in a brand new convo
   if (sender !== null) {
     const newConvo = {
@@ -8,9 +8,11 @@ export const addMessageToStore = (state, payload) => {
       messages: [message],
     };
     newConvo.latestMessageText = message.text;
+    if(updateUnreadMessagesCount){
+      newConvo.unreadMessagesCount = 1;
+    }
     return [newConvo, ...state];
   }
-
   let start;
   let convos;
   for (let i = 0; i < state.length; i++) {
@@ -18,6 +20,9 @@ export const addMessageToStore = (state, payload) => {
       const convoCopy = { ...state[i] };
       convoCopy.messages.push(message);
       convoCopy.latestMessageText = message.text;
+      if(updateUnreadMessagesCount){
+        convoCopy.unreadMessagesCount += 1;
+      }
       start = i;
       convos = convoCopy;
     }
@@ -29,6 +34,7 @@ export const addMessageToStore = (state, payload) => {
     return state;
   }
 };
+
 
 export const addOnlineUserToStore = (state, id) => {
   return state.map((convo) => {
@@ -94,3 +100,26 @@ export const addNewConvoToStore = (state, recipientId, message) => {
     return state;
   }
 };
+
+export const setMessagesRead = (state, conversationId, messages) => {
+  const newState = [...state];
+  for (let i = 0; i < newState.length; i++) {
+    if (newState[i].id === conversationId) {
+      let index = 0;
+      newState[i].messages = newState[i].messages.map((message) => {
+        if (messages[index] && message.id === messages[index].id) {
+          message = messages[index];
+          index++;
+        }
+        return message;
+      });
+      newState[i].unreadMessagesCount = 0;
+      break;
+    }
+  }
+  return [...newState];
+}
+
+
+
+

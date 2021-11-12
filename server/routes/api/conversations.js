@@ -70,6 +70,19 @@ router.get("/", async (req, res, next) => {
       // set properties for notification count and latest message preview
       const latestMessageIndex = convoJSON.messages.length - 1;
       convoJSON.latestMessageText = convoJSON.messages[latestMessageIndex].text;
+      let unreadMessagesCount = 0;
+      if (convoJSON.messages) {
+        for (let i = convoJSON.messages.length - 1; i >= 0; i--) {
+          let message = convoJSON.messages[i];
+          if (message.senderId !== userId && !message.isRead) {
+            unreadMessagesCount++;
+          }
+          if (message.senderId !== userId && message.isRead) {
+            break;
+          }
+        }
+      }
+      convoJSON.unreadMessagesCount = unreadMessagesCount;
       conversations[i] = convoJSON;
     }
     conversations.sort((a, b) =>
@@ -80,5 +93,36 @@ router.get("/", async (req, res, next) => {
     next(error);
   }
 });
+
+router.put("/read", async (req, res, next) => {
+  if (!req.user) {
+    return res.sendStatus(401);
+  }
+  const userId = req.user.id;
+  const { senderId, conversationId, recipientId } = req.body;
+  if (userId !== recipientId && userId !== senderId) {
+    return res.sendStatus(403);
+  }
+
+  const conversation = await Conversation.findConversation(senderId, recipientId);
+
+  if (!conversation) {
+    return res.sendStatus(404);
+  }
+  let messages = [];
+  await Message.update({ isRead: true }, {
+    where: {
+      senderId: senderId,
+      conversationId: conversation.id,
+      isRead: false
+    },
+    returning: true,
+  }).then((res) => {
+    messages = [...res[1]];
+  });
+
+  return res.send({ conversationId, messages: messages });
+});
+
 
 module.exports = router;

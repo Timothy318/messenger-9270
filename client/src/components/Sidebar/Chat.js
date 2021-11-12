@@ -5,7 +5,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { setActiveChat } from "../../store/activeConversation";
 import { connect } from "react-redux";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   root: {
     borderRadius: 8,
     height: 80,
@@ -16,13 +16,23 @@ const useStyles = makeStyles((theme) => ({
     "&:hover": {
       cursor: "grab"
     }
+  },
+  circle: {
+    width: "30px",
+    height: "30px",
+    lineHeight: "30px",
+    borderRadius: "50%",
+    color: "white",
+    fontSize: "15px",
+    textAlign: "center",
+    background: "#3A8DFF"
   }
 }));
 
 const Chat = (props) => {
   const classes = useStyles();
   const { conversation } = props;
-  const { otherUser } = conversation;
+  const otherUser = props.conversation.otherUser;
 
   const handleClick = async (conversation) => {
     await props.setActiveChat(conversation.otherUser.username);
@@ -37,6 +47,7 @@ const Chat = (props) => {
         sidebar={true}
       />
       <ChatContent conversation={conversation} />
+      {props.unreadMessagesCount > 0 && <Box className={classes.circle}>{props.unreadMessagesCount}</Box>}
     </Box>
   );
 };
